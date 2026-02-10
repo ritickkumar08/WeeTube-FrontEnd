@@ -1,1 +1,129 @@
 @import "tailwindcss";
+
+@theme {
+  /* ------------------------- Animations (IMPORTANT: animation, not animate) ------------------------- */
+  --animation-slide-in: slideIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  --animation-live-pulse: livePulse 2s ease-in-out infinite;
+  --animation-fade-in: fadeIn 0.3s ease-out;
+  --animation-slide-up: slideUp 0.6s ease-out forwards;
+  --animation-shrink-width: shrinkWidth 1s linear forwards;
+
+  /* ------------------------- Keyframes ------------------------- */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  @keyframes livePulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.65; transform: scale(0.92); }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes shrinkWidth {
+    from { width: 100%; }
+    to { width: 0%; }
+  }
+
+  /* ------------------------- Semantic Color Tokens ------------------------- */
+  --color-yt-primary: var(--yt-primary);
+  --color-yt-bg: var(--yt-bg);
+  --color-yt-surface: var(--yt-surface);
+  --color-yt-text: var(--yt-text);
+  --color-yt-muted: var(--yt-muted);
+  --color-yt-border: var(--yt-border);
+
+  /* Toast / Status colors */
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --color-warning: var(--warning);
+  --color-info: var(--info);
+  --color-milestone: var(--milestone);
+  --color-trending: var(--trending);
+  --color-like: var(--like);
+  --color-notification: var(--notification);
+}
+
+/* ========================= Light Theme  ========================= */
+:root {
+  --yt-primary: #ff0000;
+  --yt-bg: #ffffff;
+  --yt-surface: #f2f2f2;
+  --yt-text: #0f0f0f;
+  --yt-muted: #606060;
+  --yt-border: #d0d0d0;
+
+  /* Toast Base Colors */
+  --success: #22c55e;
+  --error: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+  --milestone: #a855f7;
+  --trending: #f97316;
+  --like: #ec4899;
+  --notification: #6366f1;
+
+  /* Compatibility aliases */
+  --color-dark-bg: var(--yt-bg);
+  --color-dark-surface: var(--yt-surface);
+  --color-dark-border: var(--yt-border);
+  --color-dark-text: var(--yt-text);
+  --color-dark-muted: var(--yt-muted);
+  --color-dark-primary: var(--yt-primary);
+  --color-dark-accent: #3ea6ff;
+}
+
+/* ========================= Dark Theme Overrides ========================= */
+.dark {
+  --yt-bg: #0f0f0f;
+  --yt-surface: #181818;
+  --yt-text: #ffffff;
+  --yt-muted: #aaaaaa;
+  --yt-border: #303030;
+}
+
+/* ========================= Base Styles ========================= */
+@layer base {
+  html,
+  body {
+    @apply transition-colors duration-300;
+  }
+}
+
+/* ========================= Utilities ========================= */
+@layer utilities {
+  .scrollbar-yt::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  .scrollbar-yt::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-yt::-webkit-scrollbar-thumb {
+    background: var(--yt-border);
+    border-radius: 10px;
+  }
+
+  .scrollbar-yt::-webkit-scrollbar-thumb:hover {
+    background: var(--yt-muted);
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
