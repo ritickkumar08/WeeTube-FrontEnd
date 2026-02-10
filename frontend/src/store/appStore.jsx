@@ -1,5 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
-
+import authReducer from './authSlice'
 
 /**
  * Central Redux store instance.
@@ -8,7 +8,7 @@ import { configureStore } from '@reduxjs/toolkit'
  */
 export const appStore = configureStore({
     reducer: {
-
+      auth: authReducer, // Authentication state management
     },
 
     //dispatching non-serializable data (Dates, Files, class instances)
