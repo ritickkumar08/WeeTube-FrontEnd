@@ -1,5 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit'
 import authReducer from './authSlice'
+import videoReducer from './videoSlice'
 
 /**
  * Central Redux store instance.
@@ -9,6 +10,7 @@ import authReducer from './authSlice'
 export const appStore = configureStore({
     reducer: {
       auth: authReducer, // Authentication state management
+      videos: videoReducer,
     },
 })
 
