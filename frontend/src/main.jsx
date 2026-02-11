@@ -8,7 +8,7 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 // Lazy pages
 const HomePage = lazy(() => import('./pages/homePage.jsx'))
-const VideoPage = lazy(() => import('./pages/videosPage.jsx'))
+const VideoPage = lazy(() => import('./pages/videoPage.jsx'))
 const ChannelProfile = lazy(() => import('./components/ChannelProfile.jsx'))
 const ChannelList = lazy(() => import('./components/ChannelList.jsx'))
 const Login = lazy(() => import('./pages/loginPage.jsx'))
