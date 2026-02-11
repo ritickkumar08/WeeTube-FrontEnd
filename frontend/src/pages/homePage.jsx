@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import Loading from '../components/Loading';
-import VideoDisplay from '../components/VideoDisplay';
+import VideoCard from '../components/VideoCard'
 
 const HomePage = () => {
   // Search term coming from layout (Navbar via Outlet context)
@@ -88,7 +88,7 @@ const HomePage = () => {
 
       {/* Video Grid Section */}
       <div className="max-w-350 mx-auto">
-        <VideoDisplay videos={filteredVideos} />
+        <VideoCard videos={filteredVideos} />
       </div>
     </div>
   );
