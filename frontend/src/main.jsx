@@ -17,7 +17,7 @@ const ErrorPage = lazy(() => import('./pages/ErrorPage.jsx'))
 const RouteErrorBoundary = lazy(() => import('./components/RouteErrorBoundary.jsx'))
 
 // Studio components
-import CreateVideo from './components/CreateVideo'
+import UploadVideo from './components/UploadVideo.jsx'
 import UpdateVideo from './components/UpdateVideo.jsx'
 import CreateChannel from './components/CreateChannel.jsx'
 import UpdateChannel from './components/UpdateChannel.jsx'
@@ -45,7 +45,7 @@ const appRouter = createBrowserRouter([
       {
         path: "studio",
         children: [
-          { path: "createVideo", element: <CreateVideo /> },
+          { path: "uploadVideo", element: <UploadVideo /> },
           { path: "updateVideo", element: <UpdateVideo /> },
           { path: "updateChannel", element: <UpdateChannel /> },
           { path: "createChannel", element: <CreateChannel /> },
