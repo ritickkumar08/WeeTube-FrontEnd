@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { CheckCircle, Settings, Users } from 'lucide-react';
 import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
@@ -66,18 +66,20 @@ const ChannelCard = React.memo(({ channel, userId, onViewClick }) => {
 });
 
 const ChannelList = () => {
-  const [channels, setChannels] = useState([]);
+  // const [channels, setChannels] = useState([]);
   const userId = useSelector(state => state.auth.user?.id);
   const navigate = useNavigate();
 
   const { data: fetchedChannels, loading: fetchLoading } = useFetch('/api/channels');
 
   // Update channels only if data is new
-  useEffect(() => {
-    if (fetchedChannels && fetchedChannels !== channels) {
-      setChannels(fetchedChannels);
-    }
-  }, [fetchedChannels, channels]);
+  const channels = useMemo(() => {
+    if (!fetchedChannels) return [];
+    
+    // Only update if different from previous (optional)
+    return fetchedChannels;
+  }, [fetchedChannels]);
+
 
   const handleViewClick = useCallback((channelId) => {
     navigate(`/channel/${channelId}`);

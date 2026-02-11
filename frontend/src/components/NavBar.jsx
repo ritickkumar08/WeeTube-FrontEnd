@@ -106,7 +106,7 @@ function NavBar({ onMenuClick, searchTerm, setSearchTerm }) {
           onClick={() => setIsDarkMode(!isDarkMode)}
           className="p-2 hover:bg-yt-surface rounded-full"
         >
-          {isDarkMode ? <Sun size={20} /> : <Moon size={20} />}
+          {isDarkMode ? <Sun size={20} color='white'/> : <Moon size={20} />}
         </button>
 
         {!user ? (

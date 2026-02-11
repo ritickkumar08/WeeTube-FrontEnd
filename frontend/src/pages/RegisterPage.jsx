@@ -84,7 +84,7 @@ const RegisterPage = () => {
       return;
     }
 
-    setTriggerPath("/user/register");
+    setTriggerPath("/user/signup");
   };
 
   return (

@@ -36,24 +36,24 @@ const Login = () => {
 
   // Handle API response
   useEffect(() => {
-    if (data) {
-      // Persist token
-      localStorage.setItem("token", data.token);
+  if (!data && !error) return;
 
-      // Update Redux state
-      dispatch(setAuth({ user: data.user, token: data.token }));
+  if (data) {
+    localStorage.setItem("token", data.token);
+    dispatch(setAuth({ user: data.user, token: data.token }));
 
-      // Reset trigger
-      setTriggerPath(null);
+    // defer state update to avoid cascading render warning
+    queueMicrotask(() => setTriggerPath(null));
 
-      navigate("/");
-    }
+    navigate("/", { replace: true });
+  }
 
-    if (error) {
-      setToastError(error); // error already normalized string
-      setTriggerPath(null);
-    }
+  if (error) {
+    queueMicrotask(() => setToastError(error));
+    queueMicrotask(() => setTriggerPath(null));
+  }
   }, [data, error, dispatch, navigate]);
+
 
   const validateLogin = () => {
     const { email, password } = formData;

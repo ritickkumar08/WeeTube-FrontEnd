@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { ThumbsUp, ThumbsDown, Clock, UserCircle } from "lucide-react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
@@ -8,181 +8,116 @@ import VideoPlayer from './VideoPlayer';
 import CommentSection from './CommentSection';
 import Loading from '../components/Loading'
 
+/* ------------------- Reducer for video state ------------------- */
+const videoReducer = (state, action) => {
+  switch(action.type) {
+    case 'SET_VIDEO':
+      return action.payload;
+    case 'UPDATE_LIKES':
+      return { ...state, likes: action.payload.likes };
+    case 'UPDATE_CHANNEL':
+      return { 
+        ...state, 
+        channel: { ...state.channel, subscribers: action.payload.subscribers }
+      };
+    default:
+      return state;
+  }
+};
+
 const VideoLanding = () => {
     const { id } = useParams();
-    const navigate = useNavigate();
-    const dispatch = useDispatch();
-    const user = useSelector((state) => state.auth.user);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const user = useSelector((state) => state.auth.user);
 
-    const [video, setVideo] = useState(null);
-    const watchLoggedRef = useRef(false);
+  const watchLoggedRef = useRef(false);
+  const [video, videoDispatch] = useReducer(videoReducer, null);
 
-    /* ---------------- Fetch Video ---------------- */
-    const { data: fetchedVideo, loading: videoLoading } = useFetch(`/video/${id}`);
+  /* ---------------- Fetch Video ---------------- */
+  const { data: fetchedVideo, loading: videoLoading } = useFetch(`/video/${id}`);
 
-    useEffect(() => {
-        if (fetchedVideo) {
-        setVideo(fetchedVideo);
-        watchLoggedRef.current = false; // reset when video changes
-        }
-    }, [fetchedVideo]);
+  useEffect(() => {
+    if (fetchedVideo) {
+      videoDispatch({ type: 'SET_VIDEO', payload: fetchedVideo });
+      watchLoggedRef.current = false;
+    }
+  }, [fetchedVideo]);
 
-    /* ---------------- Auth Headers ---------------- */
-    const headers = useMemo(() => ({
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-    }), []);
-  /* ===================== WATCH HISTORY ===================== */
-  const { data: historyRes } = useFetch(
-    user && video && !watchLoggedRef.current
-      ? "/other/watchhistory"
-      : null,
-    "POST",
-    { videoId: id },
+  /* ---------------- Auth Headers ---------------- */
+  const headers = useMemo(() => ({
+    Authorization: `Bearer ${localStorage.getItem("token")}`
+  }), []);
+
+  /* ---------------- Triggers ---------------- */
+  const [trigger, setTrigger] = React.useState({ type: null, url: null });
+
+  const { data: triggerRes } = useFetch(
+    trigger.url,
+    trigger.type === 'POST' ? 'POST' : 'GET',
+    trigger.type === 'POST' ? trigger.body : null,
     headers
   );
 
+  /* ---------------- Effect for triggers ---------------- */
   useEffect(() => {
-    if (historyRes?.user) {
-      dispatch(updateUser(historyRes.user));
-      watchLoggedRef.current = true;
+    if (!triggerRes) return;
+
+    const { type } = trigger;
+    if (triggerRes.user) {
+      dispatch(updateUser(triggerRes.user));
     }
-  }, [historyRes, dispatch]);
 
-  /* ===================== LIKE ===================== */
-  const [likeTrigger, setLikeTrigger] = useState(null);
-  const { data: likeRes } = useFetch(
-    likeTrigger,
-    "POST",
-    { videoId: id },
-    headers
-  );
-
-  useEffect(() => {
-    if (likeRes?.user && likeRes?.video) {
-      dispatch(updateUser(likeRes.user));
-      setVideo((prev) =>
-        prev ? { ...prev, likes: likeRes.video.likes } : prev
-      );
-      setLikeTrigger(null);
+    if (type === 'like' || type === 'dislike') {
+      if (triggerRes.video) {
+        videoDispatch({ type: 'UPDATE_LIKES', payload: { likes: triggerRes.video.likes } });
+      }
     }
-  }, [likeRes, dispatch]);
 
-  /* ===================== DISLIKE ===================== */
-  const [dislikeTrigger, setDislikeTrigger] = useState(null);
-  const { data: dislikeRes } = useFetch(
-    dislikeTrigger,
-    "POST",
-    { videoId: id },
-    headers
-  );
-
-  useEffect(() => {
-    if (dislikeRes?.user && dislikeRes?.video) {
-      dispatch(updateUser(dislikeRes.user));
-      setVideo((prev) =>
-        prev ? { ...prev, likes: dislikeRes.video.likes } : prev
-      );
-      setDislikeTrigger(null);
+    if (type === 'subscribe' && triggerRes.channel) {
+      videoDispatch({ type: 'UPDATE_CHANNEL', payload: { subscribers: triggerRes.channel.subscribers } });
     }
-  }, [dislikeRes, dispatch]);
 
-  /* ===================== SUBSCRIBE ===================== */
-  const [subTrigger, setSubTrigger] = useState(null);
-  const { data: subRes } = useFetch(
-    subTrigger,
-    "POST",
-    { channelId: video?.channel?._id },
-    headers
-  );
+    setTrigger({ type: null, url: null });
+  }, [triggerRes, trigger.type, dispatch]);
 
-  useEffect(() => {
-    if (subRes?.user && subRes?.channel) {
-      dispatch(updateUser(subRes.user));
-      setVideo((prev) =>
-        prev
-          ? {
-              ...prev,
-              channel: {
-                ...prev.channel,
-                subscribers: subRes.channel.subscribers,
-              },
-            }
-          : prev
-      );
-      setSubTrigger(null);
-    }
-  }, [subRes, dispatch]);
-
-  /* ===================== WATCH LATER ===================== */
-  const [laterTrigger, setLaterTrigger] = useState(null);
-  const { data: laterRes } = useFetch(
-    laterTrigger,
-    "POST",
-    { videoId: id },
-    headers
-  );
-
-  useEffect(() => {
-    if (laterRes?.user) {
-      dispatch(updateUser(laterRes.user));
-      setLaterTrigger(null);
-    }
-  }, [laterRes, dispatch]);
-
-  /* ===================== DERIVED STATE ===================== */
+  /* ---------------- Derived States ---------------- */
   const isLiked = useMemo(
-    () => user?.likedVideos?.some((v) => v._id === id),
+    () => user?.likedVideos?.some(v => v._id === id),
     [user, id]
   );
 
   const isDisliked = useMemo(
-    () => user?.dislikedVideos?.some((v) => v._id === id),
+    () => user?.dislikedVideos?.some(v => v._id === id),
     [user, id]
   );
 
   const isSubscribed = useMemo(
-    () =>
-      user?.subscribedChannels?.some(
-        (c) => c._id === video?.channel?._id
-      ),
+    () => user?.subscribedChannels?.some(c => c._id === video?.channel?._id),
     [user, video]
   );
 
   const isInWatchLater = useMemo(
-    () => user?.watchLater?.some((v) => v._id === id),
+    () => user?.watchLater?.some(v => v._id === id),
     [user, id]
   );
 
-  /* ===================== HANDLERS ===================== */
-  const requireAuth = (callback) => {
+  /* ---------------- Handlers ---------------- */
+  const requireAuth = useCallback((callback) => {
     if (!user) return alert("Login required");
     callback();
-  };
+  }, [user]);
 
-  const handleLike = () =>
-    requireAuth(() => setLikeTrigger("/other/likes"));
+  const handleLike = useCallback(() => requireAuth(() => setTrigger({ type: 'like', url: '/other/likes', body: { videoId: id } })), [requireAuth, id]);
+  const handleDislike = useCallback(() => requireAuth(() => setTrigger({ type: 'dislike', url: '/other/dislikes', body: { videoId: id } })), [requireAuth, id]);
+  const handleSubscribe = useCallback(() => requireAuth(() => setTrigger({ type: 'subscribe', url: '/other/subscribe', body: { channelId: video?.channel?._id } })), [requireAuth, video]);
+  const handleWatchLater = useCallback(() => requireAuth(() => setTrigger({ type: 'later', url: '/other/watchlater', body: { videoId: id } })), [requireAuth, id]);
 
-  const handleDislike = () =>
-    requireAuth(() => setDislikeTrigger("/other/dislikes"));
+  /* ---------------- Render ---------------- */
+  if (videoLoading) return <Loading variant="spinner" size="lg" text="Loading video..." />;
 
-  const handleSubscribe = () =>
-    requireAuth(() => setSubTrigger("/other/subscribe"));
+  if (!video) return <div className="p-10 text-center text-yt-text">Video not found.</div>;
 
-  const handleWatchLater = () =>
-    requireAuth(() => setLaterTrigger("/other/watchlater"));
-
-  /* ===================== RENDER STATES ===================== */
-  if (videoLoading)
-    return <Loading variant="spinner" size="lg" text="Loading video..." />;
-
-  if (!video)
-    return (
-      <div className="p-10 text-center text-yt-text">
-        Video not found.
-      </div>
-    );
-
-  /* ===================== UI ===================== */
   return (
     <div className="w-full flex flex-col gap-4 bg-yt-bg text-yt-text transition-colors duration-300">
       
@@ -205,26 +140,18 @@ const VideoLanding = () => {
                 alt="Channel"
                 className="h-10 w-10 rounded-full object-cover border border-yt-border"
               />
-            ) : (
-              <UserCircle size={40} className="text-yt-muted" />
-            )}
+            ) : <UserCircle size={40} className="text-yt-muted" />}
 
             <div>
-              <h3 className="font-bold">
-                {video.channel?.channelName || "Unknown Channel"}
-              </h3>
-              <p className="text-xs text-yt-muted">
-                {video.channel?.subscribers?.toLocaleString() || 0} subscribers
-              </p>
+              <h3 className="font-bold">{video.channel?.channelName || "Unknown Channel"}</h3>
+              <p className="text-xs text-yt-muted">{video.channel?.subscribers?.toLocaleString() || 0} subscribers</p>
             </div>
           </div>
 
           <button
             onClick={handleSubscribe}
             className={`px-4 py-2 rounded-full text-sm font-bold transition ${
-              isSubscribed
-                ? "bg-yt-surface border border-yt-border"
-                : "bg-yt-text text-yt-bg"
+              isSubscribed ? "bg-yt-surface border border-yt-border" : "bg-yt-text text-yt-bg"
             }`}
           >
             {isSubscribed ? "Subscribed" : "Subscribe"}
@@ -233,46 +160,22 @@ const VideoLanding = () => {
 
         {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 mt-3">
-
           <div className="flex items-center bg-yt-surface rounded-full border border-yt-border overflow-hidden">
-            <button
-              onClick={handleLike}
-              className={`flex items-center gap-2 px-4 py-2 border-r border-yt-border ${
-                isLiked ? "bg-white/10" : ""
-              }`}
-            >
+            <button onClick={handleLike} className={`flex items-center gap-2 px-4 py-2 border-r border-yt-border ${isLiked ? "bg-white/10" : ""}`}>
               <ThumbsUp size={18} fill={isLiked ? "currentColor" : "none"} />
-              <span className="text-sm font-bold">
-                {video.likes?.toLocaleString()}
-              </span>
+              <span className="text-sm font-bold">{video.likes?.toLocaleString()}</span>
             </button>
-
-            <button
-              onClick={handleDislike}
-              className={`px-4 py-2 ${
-                isDisliked ? "bg-white/10" : ""
-              }`}
-            >
+            <button onClick={handleDislike} className={`px-4 py-2 ${isDisliked ? "bg-white/10" : ""}`}>
               <ThumbsDown size={18} fill={isDisliked ? "currentColor" : "none"} />
             </button>
           </div>
 
-          <button
-            onClick={handleWatchLater}
-            className={`px-4 py-2 rounded-full border text-sm font-bold ${
-              isInWatchLater
-                ? "bg-yt-surface text-yt-primary border-yt-primary"
-                : "bg-yt-surface border-yt-border"
-            }`}
-          >
+          <button onClick={handleWatchLater} className={`px-4 py-2 rounded-full border text-sm font-bold ${isInWatchLater ? "bg-yt-surface text-yt-primary border-yt-primary" : "bg-yt-surface border-yt-border"}`}>
             <Clock size={18} className="inline mr-2" />
             {isInWatchLater ? "Saved" : "Watch Later"}
           </button>
 
-          <button
-            onClick={() => navigate(`/channel/${video.channel?._id}`)}
-            className="px-4 py-2 bg-yt-surface rounded-full border border-yt-border text-sm font-bold"
-          >
+          <button onClick={() => navigate(`/channel/${video.channel?._id}`)} className="px-4 py-2 bg-yt-surface rounded-full border border-yt-border text-sm font-bold">
             Channel
           </button>
         </div>
@@ -285,9 +188,7 @@ const VideoLanding = () => {
           <span>{new Date(video.createdAt).toLocaleDateString()}</span>
           <span className="text-yt-muted">#{video.category}</span>
         </div>
-        <p className="whitespace-pre-line line-clamp-3">
-          {video.description}
-        </p>
+        <p className="whitespace-pre-line line-clamp-3">{video.description}</p>
       </div>
 
       {/* Comments */}
