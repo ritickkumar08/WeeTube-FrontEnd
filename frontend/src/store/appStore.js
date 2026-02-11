@@ -12,6 +12,16 @@ export const appStore = configureStore({
       auth: authReducer, // Authentication state management
       videos: videoReducer,
     },
+
+    //if the dates are sent, data that are not serializable.
+    middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      // Configure serializable check for better performance
+      serializableCheck: {
+        // Ignore specific action types that may contain non-serializable data
+        ignoredActions: ['persist/PERSIST'],
+      },
+    }),
 })
 
 export default appStore;
