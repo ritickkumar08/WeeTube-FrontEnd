@@ -65,8 +65,8 @@ const HomePage = () => {
     <div className="min-h-screen bg-yt-bg transition-colors duration-300">
       
       {/* Category Navigation */}
-      <div className="sticky top-0 z-30 w-full bg-yt-bg/95 backdrop-blur-sm border-b border-yt-border px-4 py-3">
-        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar max-w-[1400px] mx-auto">
+      <div className="sticky top-0 z-30 w-full bg-yt-bg/95 backdrop-blur-sm px-4 py-3 mt-6 border">
+        <div className="flex items-center gap-3 overflow-x-auto no-scrollbar max-w-350 mx-auto">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -87,7 +87,7 @@ const HomePage = () => {
       </div>
 
       {/* Video Grid Section */}
-      <div className="max-w-[1400px] mx-auto">
+      <div className="max-w-350 mx-auto">
         <VideoDisplay videos={filteredVideos} />
       </div>
     </div>

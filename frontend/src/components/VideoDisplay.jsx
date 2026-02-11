@@ -55,7 +55,7 @@ const VideoDisplay = ({ videos = [], className = '' }) => {
         grid grid-cols-1 gap-x-6 gap-y-10 p-4
         sm:grid-cols-2
         lg:grid-cols-3
-        max-w-[1400px] mx-auto
+        max-w-350 mx-auto
         md:p-6
         ${className}
       `}
@@ -87,13 +87,13 @@ const VideoCard = ({ video, index }) => {
 
   return (
     <div
-      className="group animate-slide-up flex flex-col bg-yt-bg border border-yt-border transition-all duration-300 hover:shadow-xl hover:z-10"
+      className="group animate-slide-up flex flex-col bg-yt-bg rounded-2xl transition-all duration-300 hover:scale-105  hover:shadow-xl hover:z-10"
       style={{ animationDelay }}
     >
       {/* Thumbnail Section */}
       <Link
         to={`/watch/${video?._id}`}
-        className="relative aspect-video w-full overflow-hidden bg-yt-surface border-b border-yt-border"
+        className="relative aspect-video w-full overflow-hidden bg-yt-surface rounded-2xl"
       >
         <img
           src={thumbnailUrl}
@@ -106,7 +106,7 @@ const VideoCard = ({ video, index }) => {
         <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-300 group-hover:bg-black/10">
           <div className="opacity-0 transition-opacity group-hover:opacity-100">
             <div className="rounded-full bg-yt-primary p-3 shadow-lg">
-              <div className="ml-1 h-0 w-0 border-b-[8px] border-l-[12px] border-t-[8px] border-b-transparent border-l-white border-t-transparent" />
+              <div className="ml-1 h-0 w-0 border-b-8 border-l-12 border-t-8 border-b-transparent border-l-white border-t-transparent" />
             </div>
           </div>
         </div>
@@ -128,7 +128,7 @@ const VideoCard = ({ video, index }) => {
       {/* Video Metadata Section */}
       <div className="flex gap-3 bg-yt-bg p-4 transition-colors group-hover:bg-yt-surface/30">
         {/* Avatar */}
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           {uploader?.avatar || channel?.owner?.avatar ? (
             <img
               src={uploader?.avatar || channel?.owner?.avatar}

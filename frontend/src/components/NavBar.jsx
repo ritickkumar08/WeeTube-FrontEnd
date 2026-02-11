@@ -44,33 +44,33 @@ function NavBar({ onMenuClick, searchTerm, setSearchTerm }) {
   };
 
   return (
-    <nav className="fixed top-0 z-50 flex h-14 w-full items-center justify-between border-b border-yt-border bg-yt-bg/95 backdrop-blur-md px-2 sm:px-4">
+    <nav className="fixed top-0 z-50 flex h-20 w-full items-center justify-between bg-yt-bg/95 backdrop-blur-md px-2 sm:px-4">
 
       {/* Left Section */}
       <div className={`flex items-center gap-2 ${isSearchOpen ? 'hidden sm:flex' : ''}`}>
         <button
           onClick={onMenuClick}
-          className="rounded-full p-2 hover:bg-yt-surface"
+          className="rounded-md p-2 hover:bg-yt-surface"
         >
-          <svg className="h-6 w-6 text-yt-text" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          <svg 
+          xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-logs-icon lucide-logs"><path d="M3 5h1"/><path d="M3 12h1"/><path d="M3 19h1"/><path d="M8 5h1"/><path d="M8 12h1"/><path d="M8 19h1"/><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/>
           </svg>
         </button>
 
-        <Link to="/" className="flex items-center gap-1">
-          <div className="rounded bg-yt-primary p-1">
-            <svg className="h-4 w-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+        <Link to="/" className="flex items-center gap-2">
+          <div className="rounded bg-yt-primary p-1 shadow-sm shadow-red-600 ">
+            <svg className="h-4 w-6 text-white " fill="currentColor" viewBox="0 0 24 24">
               <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z" />
             </svg>
           </div>
-          <span className="hidden sm:block font-bold text-xl text-yt-text">
+          <span className="hidden sm:block font-bold text-xl text-yt-text text-shadow-sm text-shadow-white">
             WeeTube
           </span>
         </Link>
       </div>
       {/* Center Search */}
-      <div className={`flex-grow px-4 ${isSearchOpen ? 'flex' : 'hidden sm:flex'} justify-center`}>
-        <div className="flex w-full max-w-[600px] items-center">
+      <div className={`grow px-4 ${isSearchOpen ? 'flex' : 'hidden sm:flex'} justify-center`}>
+        <div className="flex w-full max-w-150 items-center">
           {isSearchOpen && (
             <button
               onClick={() => setIsSearchOpen(false)}
@@ -88,7 +88,7 @@ function NavBar({ onMenuClick, searchTerm, setSearchTerm }) {
               className="w-full bg-transparent px-4 py-1.5 text-sm text-yt-text outline-none"
             />
             <button className="border-l border-yt-border px-4 hover:bg-yt-border/40">
-              <Search size={18} />
+              <Search size={18} color='white'/>
             </button>
           </div>
         </div>

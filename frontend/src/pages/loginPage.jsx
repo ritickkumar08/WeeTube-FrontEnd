@@ -1,67 +1,178 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 
-import { useDispatch, useSelector } from "react-redux";
-import { loginUser } from "../store/authSlice";
+import useFetch from "../hooks/useFetch";
+import { useDispatch } from "react-redux";
+import { setAuth } from "../store/authSlice";
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import SuccesToastMessage from '../components/SuccesToastMessage';
 
+/*
+  Login Page
+  - Validates form
+  - Uses useFetch to authenticate
+  - Stores token in localStorage
+  - Syncs Redux auth state
+*/
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error } = useSelector((state) => state.auth);
-
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
   });
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const [toastError, setToastError] = useState(null);
+  const [triggerPath, setTriggerPath] = useState(null);
 
-    const result = await dispatch(loginUser(formData));
+  // API call (fires only when triggerPath !== null)
+  const { data, loading, error } = useFetch(
+    triggerPath,
+    "POST",
+    formData
+  );
 
-    // If login successful, redirect
-    if (result.meta.requestStatus === "fulfilled") {
+  // Handle API response
+  useEffect(() => {
+    if (data) {
+      // Persist token
+      localStorage.setItem("token", data.token);
+
+      // Update Redux state
+      dispatch(setAuth({ user: data.user, token: data.token }));
+
+      // Reset trigger
+      setTriggerPath(null);
+
       navigate("/");
     }
+
+    if (error) {
+      setToastError(error); // error already normalized string
+      setTriggerPath(null);
+    }
+  }, [data, error, dispatch, navigate]);
+
+  const validateLogin = () => {
+    const { email, password } = formData;
+
+    if (!email || !password)
+      return "Email and password are required.";
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email))
+      return "Invalid email format.";
+
+    return null;
+  };
+
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+
+    if (toastError) setToastError(null);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const validationError = validateLogin();
+    if (validationError) {
+      setToastError(validationError);
+      return;
+    }
+
+    setTriggerPath("/user/login");
   };
 
   return (
-    <div className="flex justify-center items-center h-screen bg-black text-white">
-      {/* <form
-        onSubmit={handleSubmit}
-        className="bg-zinc-900 p-8 rounded-md w-96 space-y-4"
-      >
-        <h2 className="text-xl font-semibold">Login</h2>
+    <div className="min-h-screen flex items-center justify-center bg-yt-bg px-4">
+      <div className="max-w-md w-full space-y-8 bg-yt-surface p-8 rounded-xl border border-yt-border shadow-2xl">
 
-        <input
-          type="email"
-          placeholder="Email"
-          className="w-full p-2 bg-zinc-800 rounded-md"
-          onChange={(e) =>
-            setFormData({ ...formData, email: e.target.value })
-          }
-        />
+        {/* Header */}
+        <div className="text-center">
+          <h2 className="text-3xl font-extrabold text-yt-text">
+            Sign in
+          </h2>
+          <p className="mt-2 text-sm text-yt-muted">
+            to continue to WeeTube
+          </p>
+        </div>
 
-        <input
-          type="password"
-          placeholder="Password"
-          className="w-full p-2 bg-zinc-800 rounded-md"
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-        />
+        {/* Error Toast */}
+        {toastError && (
+          <div className="flex justify-center">
+            <SuccesToastMessage
+              type="error"
+              message={toastError}
+              onClose={() => setToastError(null)}
+            />
+          </div>
+        )}
 
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {/* Form */}
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          <div className="space-y-4">
 
-        <button
-          className="w-full bg-red-600 p-2 rounded-md"
-          disabled={loading}
-        >
-          {loading ? "Logging in..." : "Login"}
-        </button>
-      </form> */}
+            {/* Email */}
+            <input
+              name="email"
+              type="email"
+              autoComplete="email"
+              required
+              placeholder="Email address"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-3 py-3 border border-yt-border text-yt-text bg-yt-bg rounded-md focus:ring-2 focus:ring-yt-primary focus:outline-none"
+            />
+
+            {/* Password */}
+            <div className="relative">
+              <input
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                required
+                placeholder="Password"
+                value={formData.password}
+                onChange={handleChange}
+                className="w-full px-3 py-3 border border-yt-border text-yt-text bg-yt-bg rounded-md focus:ring-2 focus:ring-yt-primary focus:outline-none"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowPassword((prev) => !prev)}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-yt-muted hover:text-yt-text"
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full py-3 rounded-full font-medium text-white bg-yt-primary hover:opacity-90 transition disabled:opacity-50"
+          >
+            {loading ? "Signing in..." : "Next"}
+          </button>
+        </form>
+
+        {/* Footer */}
+        <div className="text-center mt-4 text-sm text-yt-muted">
+          <Link
+            to="/register"
+            className="text-yt-accent hover:underline"
+          >
+            Create account
+          </Link>
+        </div>
+      </div>
     </div>
   );
 };
