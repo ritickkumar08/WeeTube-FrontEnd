@@ -1,10 +1,15 @@
-import React from 'react';
+// This layout wraps all authenticated/main pages.
+// It provides Header + Sidebar structure consistently.
 
-const mainLayout = () => {
+import { Outlet } from "react-router-dom";
+import NavBar from "../components/NavBar";
+import Sidebar from "../components/SideMenu";
+
+const Main = () => {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Top Navigation */}
-      <Header />
+      <NavBar />
 
       {/* Body Section */}
       <div className="flex">
@@ -18,6 +23,6 @@ const mainLayout = () => {
       </div>
     </div>
   );
-}
+};
 
-export default mainLayout;
+export default Main;

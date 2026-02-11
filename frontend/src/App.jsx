@@ -2,26 +2,42 @@ import { Outlet } from "react-router-dom";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import './App.css'
-import NavBar from "./components/NavBar";
-import Sidebar from "./components/SideMenu";
+
 import Homepage from "./pages/homePage";
 import VideoPage from "./pages/videoPage";
+import Login from "./pages/loginPage";
+import Main from "./layouts/Main";
+import RegisterPage from "./pages/RegisterPage";
+import ProtectedRoute from "./components/ProtectedRoute";
+import UploadPage from "./pages/UploadPage";
+
 
 function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen bg-black text-white">
-        <NavBar/>
-        <div className="flex">
-          <Sidebar/>
-          <main className="flex-1 p-6">
-            <Routes>
-              <Route path="/" element={<Homepage/>}/>
-              <Route path="/video/:id" element={<VideoPage />} />
-            </Routes>
-          </main>
-        </div>
-      </div>
+      <Routes>
+        
+        {/* Public routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<RegisterPage />} />
+
+        {/* Layout wrapped routes */}
+        <Route element={<Main />}>
+          <Route path="/" element={<Homepage />} />
+          <Route path="/video/:id" element={<VideoPage />} />
+
+          {/* Protected route inside layout */}
+          <Route
+            path="/upload"
+            element={
+              <ProtectedRoute>
+                <UploadPage />
+              </ProtectedRoute>
+            }
+          />
+        </Route>
+
+      </Routes>
     </BrowserRouter>
   );
 }
