@@ -5,6 +5,7 @@ import './App.css'
 import NavBar from "./components/NavBar";
 import Sidebar from "./components/SideMenu";
 import Homepage from "./pages/homePage";
+import VideoPage from "./pages/videoPage";
 
 function App() {
   return (
@@ -16,6 +17,7 @@ function App() {
           <main className="flex-1 p-6">
             <Routes>
               <Route path="/" element={<Homepage/>}/>
+              <Route path="/video/:id" element={<VideoPage />} />
             </Routes>
           </main>
         </div>
