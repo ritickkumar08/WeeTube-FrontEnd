@@ -29,7 +29,7 @@ const Login = () => {
 
   return (
     <div className="flex justify-center items-center h-screen bg-black text-white">
-      <form
+      {/* <form
         onSubmit={handleSubmit}
         className="bg-zinc-900 p-8 rounded-md w-96 space-y-4"
       >
@@ -61,7 +61,7 @@ const Login = () => {
         >
           {loading ? "Logging in..." : "Login"}
         </button>
-      </form>
+      </form> */}
     </div>
   );
 };
