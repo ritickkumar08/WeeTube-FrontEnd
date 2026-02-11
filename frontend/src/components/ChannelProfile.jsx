@@ -1,9 +1,13 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import useFetch from '../hooks/useFetch';
 import ErrorPage from '../pages/ErrorPage';
 import SuccesToastMessage from './SuccesToastMessage';
+import { PlusCircle, MoreVertical, Edit2, Trash2, Video as VideoIcon } from 'lucide-react';
+import DeleteChannel from './DeleteChannel';
+import Loading from '../components/Loading'
+
 
 const ChannelProfile = () => {
   const { channelId } = useParams();
@@ -111,7 +115,7 @@ const ChannelProfile = () => {
           )}
         </div>
 
-        {isDeleteModalOpen && <SecureDeleteChannel channelId={channel._id} onClose={() => setIsDeleteModalOpen(false)} />}
+        {isDeleteModalOpen && <DeleteChannel channelId={channel._id} onClose={() => setIsDeleteModalOpen(false)} />}
 
         {/* Videos Section */}
         <div className="flex justify-between items-center mt-8 mb-6">
