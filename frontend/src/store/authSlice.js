@@ -1,52 +1,56 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axiosInstance from "../config/axiosConfig";
 
-/**
- * Owns identity, session token, and auth lifecycle flags.
-*/
+// Async thunk for login
+export const loginUser = createAsyncThunk(
+  "auth/loginUser",
+  async (credentials, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.post("/auth/login", credentials);
+
+      // Store token for future requests
+      localStorage.setItem("token", res.data.token);
+
+      return res.data.user;
+    } catch (err) {
+      return rejectWithValue("Invalid credentials");
+    }
+  }
+);
+
 const initialState = {
   user: null,
-  token: localStorage.getItem('token'),
+  isAuthenticated: false,
   loading: false,
+  error: null,
 };
 
 const authSlice = createSlice({
-    name: 'auth',
-    initialState,
-    reducers:{
-        //  Hydrates auth state after successful login or session validation.
-        setAuth(state, action) {
-        const { user, token } = action.payload;
-
-        state.user = user;
-        state.token = token;
+  name: "auth",
+  initialState,
+  reducers: {
+    logout: (state) => {
+      state.user = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem("token");
+    },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-
-        if (token) {
-            localStorage.setItem('token', token);
-        }
-        }},
-
-        //Clears all authentication-related state.
-        //Used on logout or forced session invalidation.
-        clearAuth(state) {
-        state.user = null;
-        state.token = null;
+        state.user = action.payload;
+        state.isAuthenticated = true;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
+        state.error = action.payload;
+      });
+  },
+});
 
-        localStorage.removeItem('token');
-        },
-        //Applies partial updates to the authenticated user object.
-        updateUser(state, action) {
-        if (!state.user) return;
-            state.user = { ...state.user, ...action.payload };
-        },
-
-        //Toggles auth-related loading states.
-        setAuthLoading(state, action) {
-            state.loading = action.payload;
-        },
-})
-
-export const {setAuth, clearAuth, updateUser, setAuthLoading} = authSlice.actions
-
-export default authSlice.reducer
+export const { logout } = authSlice.actions;
+export default authSlice.reducer;
