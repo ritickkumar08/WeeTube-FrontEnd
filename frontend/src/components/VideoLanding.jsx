@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ThumbsUp, ThumbsDown, Clock, UserCircle } from "lucide-react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
 import useFetch from '../hooks/useFetch'
