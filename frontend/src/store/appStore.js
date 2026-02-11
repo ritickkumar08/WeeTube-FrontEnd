@@ -10,16 +10,6 @@ export const appStore = configureStore({
     reducer: {
       auth: authReducer, // Authentication state management
     },
-
-    //dispatching non-serializable data (Dates, Files, class instances)
-    middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      // Configure serializable check for better performance
-      serializableCheck: {
-        // Ignore specific action types that may contain non-serializable data
-        ignoredActions: ['persist/PERSIST'],
-      },
-    }),
 })
 
 export default appStore;

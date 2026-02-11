@@ -1,7 +1,10 @@
+import { Youtube } from 'lucide-react';
+
+
 function NavBar() {
     return (
     <header className="flex items-center justify-between px-6 py-4 bg-zinc-900">
-      <h1 className="text-xl font-bold">WeeTube</h1>
+      <h1 className="flex items-center gap-2 text-xl font-bold text-red-600"><span> <Youtube/></span>WeeTube</h1>
 
       <input
         type="text"
