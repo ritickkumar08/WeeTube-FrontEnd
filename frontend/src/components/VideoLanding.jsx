@@ -8,114 +8,98 @@ import VideoPlayer from './VideoPlayer';
 import CommentSection from './CommentSection';
 import Loading from '../components/Loading'
 
-/* ------------------- Reducer for video state ------------------- */
-const videoReducer = (state, action) => {
-  switch(action.type) {
-    case 'SET_VIDEO':
-      return action.payload;
-    case 'UPDATE_LIKES':
-      return { ...state, likes: action.payload.likes };
-    case 'UPDATE_CHANNEL':
-      return { 
-        ...state, 
-        channel: { ...state.channel, subscribers: action.payload.subscribers }
-      };
-    default:
-      return state;
-  }
-};
 
 const VideoLanding = () => {
-    const { id } = useParams();
+  const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state) => state.auth.user);
+  const [video, setVideo] = useState(null);
 
-  const watchLoggedRef = useRef(false);
-  const [video, videoDispatch] = useReducer(videoReducer, null);
-
-  /* ---------------- Fetch Video ---------------- */
+  // 1. Initial Video Fetch
   const { data: fetchedVideo, loading: videoLoading } = useFetch(`/video/${id}`);
 
   useEffect(() => {
-    if (fetchedVideo) {
-      videoDispatch({ type: 'SET_VIDEO', payload: fetchedVideo });
-      watchLoggedRef.current = false;
-    }
+    if (fetchedVideo) setVideo(fetchedVideo);
   }, [fetchedVideo]);
 
-  /* ---------------- Auth Headers ---------------- */
+  // 2. Memoized Headers
   const headers = useMemo(() => ({
-    Authorization: `Bearer ${localStorage.getItem("token")}`
+    Authorization: `Bearer ${localStorage.getItem('token')}`
   }), []);
 
-  /* ---------------- Triggers ---------------- */
-  const [trigger, setTrigger] = React.useState({ type: null, url: null });
-
-  const { data: triggerRes } = useFetch(
-    trigger.url,
-    trigger.type === 'POST' ? 'POST' : 'GET',
-    trigger.type === 'POST' ? trigger.body : null,
+  // 3. ACTION HOOKS (Trigger Pattern)
+  
+  // A. Watch History Trigger
+  const { data: historyRes } = useFetch(
+    (user && video) ? '/other/watchhistory' : null, 
+    'POST', 
+    { videoId: id }, 
     headers
   );
 
-  /* ---------------- Effect for triggers ---------------- */
+  // B. Like Trigger
+  const [likeTrigger, setLikeTrigger] = useState(null);
+  const { data: likeRes } = useFetch(likeTrigger, 'POST', { videoId: id }, headers);
+
+  // C. Dislike Trigger
+  const [dislikeTrigger, setDislikeTrigger] = useState(null);
+  const { data: dislikeRes } = useFetch(dislikeTrigger, 'POST', { videoId: id }, headers);
+
+  // D. Subscribe Trigger
+  const [subTrigger, setSubTrigger] = useState(null);
+  const { data: subRes } = useFetch(subTrigger, 'POST', { channelId: video?.channel?._id }, headers);
+
+  // E. Watch Later Trigger
+  const [laterTrigger, setLaterTrigger] = useState(null);
+  const { data: laterRes } = useFetch(laterTrigger, 'POST', { videoId: id }, headers);
+
+  // 4. STATUS CHECKS
+  const isLiked = useMemo(() => user?.likedVideos?.some(v => v._id === id), [user, id]);
+  const isDisliked = useMemo(() => user?.dislikedVideos?.some(v => v._id === id), [user, id]);
+  const isSubscribed = useMemo(() => user?.subscribedChannels?.some(c => c._id === video?.channel?._id), [user, video]);
+  const isInWatchLater = useMemo(() => user?.watchLater?.some(v => v._id === id), [user, id]);
+
+  // 5. RESPONSE LISTENERS (Sync Redux and Local UI)
   useEffect(() => {
-    if (!triggerRes) return;
-
-    const { type } = trigger;
-    if (triggerRes.user) {
-      dispatch(updateUser(triggerRes.user));
-    }
-
-    if (type === 'like' || type === 'dislike') {
-      if (triggerRes.video) {
-        videoDispatch({ type: 'UPDATE_LIKES', payload: { likes: triggerRes.video.likes } });
+    const responses = [
+      { res: historyRes },
+      { res: likeRes, type: 'like' },
+      { res: dislikeRes, type: 'dislike' },
+      { res: subRes, type: 'sub' },
+      { res: laterRes }
+    ];
+    responses.forEach(({ res, type }) => {
+      if (res?.user) {
+        dispatch(updateUser(res.user));
+        
+        // Handle local UI increments/decrements
+        if (type === 'like') {
+          setVideo(prev => ({ ...prev, likes: isLiked ? prev.likes - 1 : prev.likes + 1 }));
+          setLikeTrigger(null);
+        }
+        if (type === 'dislike') {
+          if (isLiked) setVideo(prev => ({ ...prev, likes: prev.likes - 1 }));
+          setDislikeTrigger(null);
+        }
+        if (type === 'sub') {
+          setVideo(prev => ({
+            ...prev,
+            channel: { ...prev.channel, subscribers: isSubscribed ? prev.channel.subscribers - 1 : prev.channel.subscribers + 1 }
+          }));
+          setSubTrigger(null);
+        }
       }
-    }
+    });
+  }, [historyRes, likeRes, dislikeRes, subRes, laterRes]);
 
-    if (type === 'subscribe' && triggerRes.channel) {
-      videoDispatch({ type: 'UPDATE_CHANNEL', payload: { subscribers: triggerRes.channel.subscribers } });
-    }
+  // 6. HANDLERS
+  const handleLike = () => !user ? alert("Login to like") : setLikeTrigger('/api/actions/likes');
+  const handleDislike = () => !user ? alert("Login to dislike") : setDislikeTrigger('/api/actions/dislikes');
+  const handleSubscribe = () => !user ? alert("Login to subscribe") : setSubTrigger('/api/actions/subscribe');
+  const handleWatchLater = () => !user ? alert("Login to use Watch Later") : setLaterTrigger('/api/actions/watchlater');
 
-    setTrigger({ type: null, url: null });
-  }, [triggerRes, trigger.type, dispatch]);
-
-  /* ---------------- Derived States ---------------- */
-  const isLiked = useMemo(
-    () => user?.likedVideos?.some(v => v._id === id),
-    [user, id]
-  );
-
-  const isDisliked = useMemo(
-    () => user?.dislikedVideos?.some(v => v._id === id),
-    [user, id]
-  );
-
-  const isSubscribed = useMemo(
-    () => user?.subscribedChannels?.some(c => c._id === video?.channel?._id),
-    [user, video]
-  );
-
-  const isInWatchLater = useMemo(
-    () => user?.watchLater?.some(v => v._id === id),
-    [user, id]
-  );
-
-  /* ---------------- Handlers ---------------- */
-  const requireAuth = useCallback((callback) => {
-    if (!user) return alert("Login required");
-    callback();
-  }, [user]);
-
-  const handleLike = useCallback(() => requireAuth(() => setTrigger({ type: 'like', url: '/other/likes', body: { videoId: id } })), [requireAuth, id]);
-  const handleDislike = useCallback(() => requireAuth(() => setTrigger({ type: 'dislike', url: '/other/dislikes', body: { videoId: id } })), [requireAuth, id]);
-  const handleSubscribe = useCallback(() => requireAuth(() => setTrigger({ type: 'subscribe', url: '/other/subscribe', body: { channelId: video?.channel?._id } })), [requireAuth, video]);
-  const handleWatchLater = useCallback(() => requireAuth(() => setTrigger({ type: 'later', url: '/other/watchlater', body: { videoId: id } })), [requireAuth, id]);
-
-  /* ---------------- Render ---------------- */
   if (videoLoading) return <Loading variant="spinner" size="lg" text="Loading video..." />;
-
   if (!video) return <div className="p-10 text-center text-yt-text">Video not found.</div>;
 
   return (

@@ -44,12 +44,11 @@ const ChannelProfile = () => {
   useEffect(() => {
     if (deleteRes) {
       setLocalVideos(prev => prev.filter(v => v._id !== videoToDelete));
-      setToast({ type: 'success', title: 'Deleted', message: 'Video deleted successfully.' });
       setVideoToDelete(null);
       setActiveMenu(null);
     }
     if (deleteError) {
-      setToast({ type: 'error', title: 'Error', message: deleteError.response?.data?.message || 'Failed to delete video.' });
+      alert("Failed to delete video: " + deleteError.message);
       setVideoToDelete(null);
     }
   }, [deleteRes, deleteError, videoToDelete]);

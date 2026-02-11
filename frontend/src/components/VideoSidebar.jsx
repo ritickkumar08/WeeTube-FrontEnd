@@ -6,14 +6,18 @@ const VideoSidebar = () => {
   const [videos, setVideos] = useState([]);
 
   useEffect(() => {
-    const cachedVideos = localStorage.getItem("yt_videos_cache");
-    if (cachedVideos) {
+    const fetchPageData = () => {
       try {
-        setVideos(JSON.parse(cachedVideos));
-      } catch (err) {
-        console.error("Failed to parse cached videos", err);
+        const cachedVideos = localStorage.getItem("yt_videos_cache");
+        if (cachedVideos) {
+          console.log(JSON.parse(cachedVideos));
+          setVideos(JSON.parse(cachedVideos));
+        }
+      } catch (error) {
+        console.error("Error loading page data", error);
       }
-    }
+    };
+    fetchPageData();
   }, [id]);
 
   return (
