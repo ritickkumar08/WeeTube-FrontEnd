@@ -1,6 +1,6 @@
 import React from 'react';
 
-const videosPage = () => {
+const VideoSidebar = () => {
   return (
     <div>
       
@@ -8,4 +8,4 @@ const videosPage = () => {
   );
 }
 
-export default videosPage;
+export default VideoSidebar;

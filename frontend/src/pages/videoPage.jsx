@@ -1,36 +1,30 @@
 import React from 'react';
-import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
-import axiosInstance from "../config/axiosConfig";
-import CommentSection from "../components/CommentSection";
+import VideoSidebar from '../components/VideoSidebar';
+import VideoLanding from '../components/VideoLanding';
+
+/*
+  Videos Page Layout
+  - Displays selected video + comments
+  - Shows recommended videos on large screens
+*/
 
 const VideoPage = () => {
-  const { id } = useParams();
-  const [video, setVideo] = useState(null);
-
-  useEffect(() => {
-    const fetchVideo = async () => {
-      const res = await axiosInstance.get(`/videos/${id}`);
-      setVideo(res.data);
-    };
-    fetchVideo();
-  }, [id]);
-
-  if (!video) return <p>Loading...</p>;
-
   return (
-    <div className="flex gap-6">
-      <div className="flex-1">
-        <video
-          src={video.videoUrl}
-          controls
-          className="w-full rounded-md"
-        />
+    <div className="w-full min-h-screen bg-yt-bg">
+      
+      {/* Centered container for ultra-wide screens */}
+      <div className="max-w-425 mx-auto flex flex-col lg:flex-row gap-4 px-0 sm:px-4 py-4">
+        
+        {/* Main video content section */}
+        <main className="flex-1 lg:basis-[70%]">
+          <VideoLanding />
+        </main>
 
-        <h2 className="text-xl mt-4">{video.title}</h2>
-        <p className="text-gray-400">{video.description}</p>
+        {/* Recommendation sidebar (visible only on lg and above) */}
+        <aside className="hidden lg:block lg:basis-[30%]">
+          <VideoSidebar/>
+        </aside>
 
-        <CommentSection videoId={id} />
       </div>
     </div>
   );
