@@ -24,16 +24,24 @@ const CommentSection = ({ videoId, currentUser }) => {
   const headers = useMemo(() => {
     const token = localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
-  }, []);
+  }, [localStorage.getItem("token")]);
 
   /* ===================== FETCH COMMENTS ===================== */
   const { data: fetchedComments } = useFetch(
-    videoId ? `/comment/${videoId}` : null
+    videoId ? `/comment/${videoId}` : null,
+    'GET',
+    null,
+    {},
+    [videoId]
   );
 
   useEffect(() => {
     if (fetchedComments) {
-      setComments(fetchedComments);
+      // backend returns shape: { totalComments, commentList: [...] }
+      const list = Array.isArray(fetchedComments)
+        ? fetchedComments
+        : fetchedComments.commentList || [];
+      setComments(list);
     }
   }, [fetchedComments]);
 
@@ -44,7 +52,8 @@ const CommentSection = ({ videoId, currentUser }) => {
     postTrigger,
     "POST",
     { text: newComment, videoId },
-    headers
+    headers,
+    [postTrigger, videoId, newComment]
   );
 
   useEffect(() => {
@@ -63,7 +72,8 @@ const CommentSection = ({ videoId, currentUser }) => {
     patchTrigger,
     "PATCH",
     { text: editText },
-    headers
+    headers,
+    [patchTrigger, editText]
   );
 
   useEffect(() => {
@@ -84,7 +94,8 @@ const CommentSection = ({ videoId, currentUser }) => {
     deleteTrigger,
     "DELETE",
     null,
-    headers
+    headers,
+    [deleteTrigger]
   );
 
   useEffect(() => {

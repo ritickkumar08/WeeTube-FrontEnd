@@ -29,7 +29,7 @@ const VideoSidebar = () => {
           className="flex gap-2 group p-1 rounded-lg hover:bg-yt-surface transition-colors"
         >
           {/* Thumbnail */}
-          <div className="w-40 h-24 flex-shrink-0 relative">
+          <div className="w-40 h-24 shrink-0 relative">
             <img
               src={video.thumbnailUrl}
               alt={video.title}

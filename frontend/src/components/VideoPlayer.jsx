@@ -2,7 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 
 
-const VideoPlayer = () => {
+const VideoPlayer = ({ src, ...videoProps }) => {
   const videoRef = useRef(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -77,12 +77,13 @@ const VideoPlayer = () => {
     <div className="group relative w-full aspect-video bg-black overflow-hidden border border-yt-border transition-all duration-300">
       <video
         ref={videoRef}
-        // src={src}
+        src={src}
         className="w-full h-full cursor-pointer"
         onTimeUpdate={handleTimeUpdate}
         onClick={togglePlay}
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
+        {...videoProps}
       />
 
       {/* Controls Overlay */}

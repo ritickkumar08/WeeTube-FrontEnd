@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 
 import useFetch from "../hooks/useFetch";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { setAuth } from "../store/authSlice";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -17,6 +17,7 @@ import SuccesToastMessage from '../components/SuccesToastMessage';
 const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const user = useSelector((state) => state.auth.user);
 
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,6 +34,13 @@ const Login = () => {
     "POST",
     formData
   );
+
+  // If already authenticated, redirect away from login
+  useEffect(() => {
+    if (user) {
+      navigate("/", { replace: true });
+    }
+  }, [user, navigate]);
 
   // Handle API response
   useEffect(() => {

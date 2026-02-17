@@ -31,7 +31,8 @@ function App() {
     token ? "/user/me" : null, 
     "GET", 
     null, 
-    headers
+    headers,
+    [token]
   );
 
   // Sync hook results with Redux store

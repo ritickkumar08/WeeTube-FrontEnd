@@ -17,7 +17,8 @@ const useFetch = (
   actionPath,
   method = 'GET',
   body = null,
-  headers = {}
+  headers = {},
+  deps = []
 ) => {
   // Stores API response
   const [data, setData] = useState(null);
@@ -37,6 +38,7 @@ const useFetch = (
 
     setLoading(true);
     setError(null);
+    setData(null);
 
     try {
       // Base backend URL from environment variable
@@ -67,15 +69,14 @@ const useFetch = (
     } finally {
       setLoading(false);
     }
-  }, [actionPath, method, body, headers]);
+  }, [actionPath, method, ...deps]);
 
   /**
    * Automatically trigger fetch on dependency change
    */
-  useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+  useEffect(() => { fetchData(); }, [fetchData]);
 
+  
   return {
     data,
     loading,

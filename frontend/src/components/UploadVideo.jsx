@@ -21,24 +21,35 @@ const UploadVideo = () => {
   const [toast, setToast] = useState(null);
 
   // Memoized headers for stable fetch
-  const headers = useMemo(() => ({
-    Authorization: `Bearer ${localStorage.getItem('token')}`
-  }), []);
+  const headers = useMemo(() => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, [localStorage.getItem('token')]);
 
   // Hook for Video Creation (POST)
   const [createTrigger, setCreateTrigger] = useState(null);
   const { data: createResponse, loading: createLoading, error: createError } = useFetch(
-    createTrigger, 'POST', formData, headers
+    createTrigger,
+    'POST',
+    formData,
+    headers,
+    [createTrigger, formData]
   );
 
   // Hook for Refreshing User Data (GET)
   const [refreshTrigger, setRefreshTrigger] = useState(null);
-  const { data: refreshedUser, error: refreshError } = useFetch(refreshTrigger, 'GET', null, headers);
+  const { data: refreshedUser, error: refreshError } = useFetch(
+    refreshTrigger,
+    'GET',
+    null,
+    headers,
+    [refreshTrigger]
+  );
 
   // Handle POST response
   useEffect(() => {
     if (createResponse) {
-      setRefreshTrigger('/api/auth/me'); // Refresh user data
+      setRefreshTrigger('/user/me'); // Refresh user data
     }
     if (createError) {
       setToast({
@@ -76,7 +87,7 @@ const UploadVideo = () => {
       return setToast({ type: 'error', title: 'Validation Error', message: 'Missing required fields.' });
     }
 
-    setCreateTrigger('/api/videos'); // Trigger POST
+    setCreateTrigger('/video/upload'); // Trigger POST
   };
 
   return (

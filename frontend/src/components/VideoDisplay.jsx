@@ -61,7 +61,7 @@ const VideoDisplay = ({ videos = [], className = '' }) => {
       `}
     >
       {videos.map((video, index) => (
-        <VideoCard key={video?._id || index} video={video} index={index} />
+        <VideoCard key={video?._id ?? `video-${index}`} video={video} index={index} />
       ))}
     </div>
   );

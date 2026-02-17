@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ThumbsUp, ThumbsDown, Clock, UserCircle } from "lucide-react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { useSelector, useDispatch } from "react-redux";
@@ -17,16 +17,19 @@ const VideoLanding = () => {
   const [video, setVideo] = useState(null);
 
   // 1. Initial Video Fetch
-  const { data: fetchedVideo, loading: videoLoading } = useFetch(`/video/${id}`);
+  const { data: fetchedVideo, loading: videoLoading } = useFetch(`/video/${id}`, 'GET', null, {}, [id]);
 
   useEffect(() => {
-    if (fetchedVideo) setVideo(fetchedVideo);
-  }, [fetchedVideo]);
+  if (fetchedVideo !== undefined && fetchedVideo !== null) {
+    setVideo(fetchedVideo);
+  }
+}, [fetchedVideo]);
 
   // 2. Memoized Headers
-  const headers = useMemo(() => ({
-    Authorization: `Bearer ${localStorage.getItem('token')}`
-  }), []);
+  const headers = useMemo(() => {
+    const token = localStorage.getItem('token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }, [localStorage.getItem('token')]);
 
   // 3. ACTION HOOKS (Trigger Pattern)
   
@@ -35,24 +38,49 @@ const VideoLanding = () => {
     (user && video) ? '/other/watchhistory' : null, 
     'POST', 
     { videoId: id }, 
-    headers
+    headers,
+    [user?._id, video?._id, id]
   );
 
   // B. Like Trigger
   const [likeTrigger, setLikeTrigger] = useState(null);
-  const { data: likeRes } = useFetch(likeTrigger, 'POST', { videoId: id }, headers);
+  const { data: likeRes } = useFetch(
+    likeTrigger,
+    'POST',
+    { videoId: id },
+    headers,
+    [likeTrigger, id, user?._id]
+  );
 
   // C. Dislike Trigger
   const [dislikeTrigger, setDislikeTrigger] = useState(null);
-  const { data: dislikeRes } = useFetch(dislikeTrigger, 'POST', { videoId: id }, headers);
+  const { data: dislikeRes } = useFetch(
+    dislikeTrigger,
+    'POST',
+    { videoId: id },
+    headers,
+    [dislikeTrigger, id, user?._id]
+  );
 
   // D. Subscribe Trigger
   const [subTrigger, setSubTrigger] = useState(null);
-  const { data: subRes } = useFetch(subTrigger, 'POST', { channelId: video?.channel?._id }, headers);
+  const { data: subRes } = useFetch(
+    subTrigger,
+    'POST',
+    { channelId: video?.channel?._id },
+    headers,
+    [subTrigger, video?.channel?._id, user?._id]
+  );
 
   // E. Watch Later Trigger
   const [laterTrigger, setLaterTrigger] = useState(null);
-  const { data: laterRes } = useFetch(laterTrigger, 'POST', { videoId: id }, headers);
+  const { data: laterRes } = useFetch(
+    laterTrigger,
+    'POST',
+    { videoId: id },
+    headers,
+    [laterTrigger, id, user?._id]
+  );
 
   // 4. STATUS CHECKS
   const isLiked = useMemo(() => user?.likedVideos?.some(v => v._id === id), [user, id]);
@@ -91,13 +119,13 @@ const VideoLanding = () => {
         }
       }
     });
-  }, [historyRes, likeRes, dislikeRes, subRes, laterRes]);
+  }, [historyRes, likeRes, dislikeRes, subRes, laterRes, isLiked, isDisliked, isSubscribed, dispatch]);
 
   // 6. HANDLERS
-  const handleLike = () => !user ? alert("Login to like") : setLikeTrigger('/api/actions/likes');
-  const handleDislike = () => !user ? alert("Login to dislike") : setDislikeTrigger('/api/actions/dislikes');
-  const handleSubscribe = () => !user ? alert("Login to subscribe") : setSubTrigger('/api/actions/subscribe');
-  const handleWatchLater = () => !user ? alert("Login to use Watch Later") : setLaterTrigger('/api/actions/watchlater');
+  const handleLike = () => !user ? alert("Login to like") : setLikeTrigger('/others/likes');
+  const handleDislike = () => !user ? alert("Login to dislike") : setDislikeTrigger('/others/dislikes');
+  const handleSubscribe = () => !user ? alert("Login to subscribe") : setSubTrigger('/others/subscribe');
+  const handleWatchLater = () => !user ? alert("Login to use Watch Later") : setLaterTrigger('/user/watchlater');
 
   if (videoLoading) return <Loading variant="spinner" size="lg" text="Loading video..." />;
   if (!video) return <div className="p-10 text-center text-yt-text">Video not found.</div>;
