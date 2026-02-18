@@ -10,7 +10,7 @@ const VideoSidebar = () => {
       try {
         const cachedVideos = localStorage.getItem("yt_videos_cache");
         if (cachedVideos) {
-          console.log(JSON.parse(cachedVideos));
+          // console.log(JSON.parse(cachedVideos));
           setVideos(JSON.parse(cachedVideos));
         }
       } catch (error) {

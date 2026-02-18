@@ -33,11 +33,11 @@ const VideoLanding = () => {
 
   // 3. ACTION HOOKS (Trigger Pattern)
   
-  // A. Watch History Trigger
+  // A. Watch History Trigger (backend is mounted at /others)
   const { data: historyRes } = useFetch(
-    (user && video) ? '/other/watchhistory' : null, 
-    'POST', 
-    { videoId: id }, 
+    (user && video && id) ? '/others/watchhistory' : null,
+    'POST',
+    { videoId: id },
     headers,
     [user?._id, video?._id, id]
   );

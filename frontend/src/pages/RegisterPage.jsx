@@ -44,9 +44,9 @@ const RegisterPage = () => {
   }, [data, error, navigate]);
 
   const validate = () => {
-    const { username, email, password } = formData;
+    const { userName, email, password } = formData;
 
-    if (!username || !email || !password)
+    if (!userName || !email || !password)
       return "All fields are required.";
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -124,7 +124,7 @@ const RegisterPage = () => {
               autoComplete="username"
               required
               placeholder="Username"
-              value={formData.username}
+              value={formData.userName}
               onChange={handleChange}
               className="w-full px-3 py-3 border border-yt-border text-yt-text bg-yt-bg rounded-md focus:ring-2 focus:ring-yt-primary focus:outline-none"
             />

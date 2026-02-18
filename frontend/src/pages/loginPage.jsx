@@ -57,7 +57,11 @@ const Login = () => {
   }
 
   if (error) {
-    queueMicrotask(() => setToastError(error));
+    // 401 = backend rejected email/password; show a clear message
+    const message = error === 'Invalid credentials' || error.includes('401')
+      ? 'Invalid email or password. Please try again.'
+      : error;
+    queueMicrotask(() => setToastError(message));
     queueMicrotask(() => setTriggerPath(null));
   }
   }, [data, error, dispatch, navigate]);
