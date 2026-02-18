@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react'
 import { CheckCircle, XCircle, X } from 'lucide-react';
 
-export const SuccesToastMessage = ( type = 'success',
+export const SuccesToastMessage = ({
+  type = 'success',
   title = '',
   message = '',
   duration = 3000,
   onClose = () => {},
-) => {
+}) => {
     const [visible, setVisible] = useState(false);
     const [progress, setProgress] = useState(100);
 
@@ -34,7 +35,7 @@ export const SuccesToastMessage = ( type = 'success',
         }
 
         return () => clearTimeout(enterTimer);
-    }, [duration]);
+    }, [duration, onClose]);
 
     const handleClose = () => {
         setVisible(false);

@@ -47,13 +47,31 @@ const CreateChannel = () => {
     if (createData) {
       setCreateTrigger(null); // reset trigger
       setRefreshTrigger('/user/me');
+
+      // Redirect immediately using returned channel id (more reliable than waiting for /user/me)
+      const createdId = createData?._id;
+      if (createdId) {
+        setToast({
+          type: 'success',
+          title: 'Success',
+          message: 'Channel created successfully'
+        });
+
+        const timer = setTimeout(() => {
+          navigate(`/channel/${createdId}`);
+        }, 800);
+
+        return () => clearTimeout(timer);
+      }
     }
 
     if (createError) {
       setToast({
         type: 'error',
         title: 'Error',
-        message: typeof createError === 'string' ? createError : (createError?.response?.data?.message || 'Channel creation failed')
+        message: typeof createError === 'string'
+          ? createError
+          : (createError?.response?.data?.message || 'Channel creation failed')
       });
       setCreateTrigger(null);
     }
@@ -64,20 +82,13 @@ const CreateChannel = () => {
     if (updatedUserData) {
       dispatch(updateUser(updatedUserData));
 
-      setToast({
-        type: 'success',
-        title: 'Success',
-        message: 'Channel created successfully'
-      });
-
-      // Redirect after short delay
-      const timer = setTimeout(() => {
-        if (updatedUserData?.channel?._id) {
+      // If we didn't already redirect using createData._id, do it here.
+      if (updatedUserData?.channel?._id) {
+        const timer = setTimeout(() => {
           navigate(`/channel/${updatedUserData.channel._id}`);
-        }
-      }, 1200);
-
-      return () => clearTimeout(timer);
+        }, 400);
+        return () => clearTimeout(timer);
+      }
     }
 
     if (refreshError) {
