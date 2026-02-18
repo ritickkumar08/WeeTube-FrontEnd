@@ -55,7 +55,9 @@ const UploadVideo = () => {
       setToast({
         type: 'error',
         title: 'Error',
-        message: createError.response?.data?.message || 'Failed to upload video.'
+        message: typeof createError === 'string'
+          ? createError
+          : (createError?.response?.data?.message || 'Failed to upload video.')
       });
       setCreateTrigger(null); // Reset trigger to allow retry
     }
@@ -83,7 +85,10 @@ const UploadVideo = () => {
     e.preventDefault();
 
     // Validation
-    if (!formData.title || !formData.videoUrl || !formData.thumbnailUrl) {
+    if (!formData.title?.trim() || formData.title.trim().length < 3) {
+      return setToast({ type: 'error', title: 'Validation Error', message: 'Title must be at least 3 characters.' });
+    }
+    if (!formData.videoUrl?.trim() || !formData.thumbnailUrl?.trim()) {
       return setToast({ type: 'error', title: 'Validation Error', message: 'Missing required fields.' });
     }
 
