@@ -10,7 +10,7 @@ const RegisterPage = () => {
 
   // Form state
   const [formData, setFormData] = useState({
-    username: "",
+    userName: "",
     email: "",
     password: "",
   });
@@ -119,11 +119,11 @@ const RegisterPage = () => {
 
             {/* Username */}
             <input
-              name="username"
+              name="userName"
               type="text"
-              autoComplete="username"
+              autoComplete="userName"
               required
-              placeholder="Username"
+              placeholder="UserName"
               value={formData.userName}
               onChange={handleChange}
               className="w-full px-3 py-3 border border-yt-border text-yt-text bg-yt-bg rounded-md focus:ring-2 focus:ring-yt-primary focus:outline-none"

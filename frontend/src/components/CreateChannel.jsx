@@ -46,7 +46,7 @@ const CreateChannel = () => {
   useEffect(() => {
     if (createData) {
       setCreateTrigger(null); // reset trigger
-      setRefreshTrigger('/api/auth/me');
+      setRefreshTrigger('/channel/me');
     }
 
     if (createError) {
@@ -116,7 +116,7 @@ const CreateChannel = () => {
   };
 
   return (
-    <div className="bg-yt-bg min-h-screen p-4 xxs:p-8">
+    <div className="bg-yt-bg min-h-screen p-4 xxs:p-8 mt-2">
       {toast && (
         <SuccessToast
           type={toast.type}
@@ -200,7 +200,7 @@ const CreateChannel = () => {
             disabled={createLoading}
             className="w-full bg-yt-text text-yt-bg font-bold py-4 rounded-xl hover:opacity-90 transition-all uppercase tracking-widest disabled:opacity-50"
           >
-            {createLoading ? 'Creating...' : 'Launch Channel'}
+            {createLoading ? 'Creating...' : 'Create Channel'}
           </button>
         </form>
       </div>

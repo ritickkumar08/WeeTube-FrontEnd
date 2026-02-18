@@ -21,10 +21,11 @@ const CommentSection = ({ videoId, currentUser }) => {
   const [editText, setEditText] = useState("");
 
   /* ===================== AUTH HEADERS ===================== */
+  const token = localStorage.getItem("token");
+
   const headers = useMemo(() => {
-    const token = localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
-  }, [localStorage.getItem("token")]);
+  }, [token]);
 
   /* ===================== FETCH COMMENTS ===================== */
   const { data: fetchedComments } = useFetch(
@@ -41,6 +42,7 @@ const CommentSection = ({ videoId, currentUser }) => {
       const list = Array.isArray(fetchedComments)
         ? fetchedComments
         : fetchedComments.commentList || [];
+        
       setComments(list);
     }
   }, [fetchedComments]);
@@ -112,7 +114,7 @@ const CommentSection = ({ videoId, currentUser }) => {
     if (!currentUser) return alert("Login required");
     if (!newComment.trim()) return;
 
-    setPostTrigger("/comment");
+    setPostTrigger(`/comment/new-comment/${videoId}`);
   };
 
   const startEdit = (comment) => {

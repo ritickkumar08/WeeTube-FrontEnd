@@ -79,10 +79,12 @@ const VideoCard = ({ video, index }) => {
     views = 0,
     likes = 0,
     dislikes = 0,
-    channel,
+    channelName,
     uploader
   } = video || {};
 
+  console.log(video);
+  
   const animationDelay = `${index * 50}ms`;
 
   return (
@@ -129,9 +131,9 @@ const VideoCard = ({ video, index }) => {
       <div className="flex gap-3 bg-yt-bg p-4 transition-colors group-hover:bg-yt-surface/30">
         {/* Avatar */}
         <div className="shrink-0">
-          {uploader?.avatar || channel?.owner?.avatar ? (
+          {uploader?.avatar || channelName?.owner?.avatar ? (
             <img
-              src={uploader?.avatar || channel?.owner?.avatar}
+              src={uploader?.avatar || channelName?.owner?.avatar}
               className="h-9 w-9 rounded-full border border-yt-border object-cover"
               alt="avatar"
             />
@@ -156,7 +158,7 @@ const VideoCard = ({ video, index }) => {
 
           {/* Channel Name */}
           <p className="mt-1 truncate text-xs font-semibold text-yt-muted transition-colors hover:text-yt-text cursor-pointer">
-            {channel?.channelName || uploader?.username || 'Unknown Channel'}
+            {channelName?.channelName || uploader?.username || 'Unknown Channel'}
           </p>
 
           {/* Engagement Stats */}

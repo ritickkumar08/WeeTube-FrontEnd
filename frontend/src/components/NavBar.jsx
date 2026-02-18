@@ -50,7 +50,7 @@ function NavBar({ onMenuClick, searchTerm, setSearchTerm }) {
       <div className={`flex items-center gap-2 ${isSearchOpen ? 'hidden sm:flex' : ''}`}>
         <button
           onClick={onMenuClick}
-          className="rounded-md p-2 hover:bg-yt-surface"
+          className="rounded-md p-2 hover:bg-yt-surface shadow-sm shadow-black"
         >
           <svg 
           xmlns="http://www.w3.org/2000/svg" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#ffffff" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-logs-icon lucide-logs"><path d="M3 5h1"/><path d="M3 12h1"/><path d="M3 19h1"/><path d="M8 5h1"/><path d="M8 12h1"/><path d="M8 19h1"/><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/>
@@ -119,7 +119,7 @@ function NavBar({ onMenuClick, searchTerm, setSearchTerm }) {
           ) : (
           <div className="relative group flex items-center gap-3">
             <img
-              src={user.avatar || 'https://via.placeholder.com/32'}
+              src={user.avatar || 'https://placehold.co/32'}
               className="h-8 w-8 rounded-full object-cover cursor-pointer"
               alt="Profile"
             />
