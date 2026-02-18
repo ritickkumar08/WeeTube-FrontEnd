@@ -46,6 +46,8 @@ const appRouter = createBrowserRouter([
         path: "studio",
         children: [
           { path: "uploadVideo", element: <UploadVideo /> },
+          // Backwards-compatible alias (older links/buttons)
+          { path: "CreateVideo", element: <UploadVideo /> },
           { path: "updateVideo", element: <UpdateVideo /> },
           { path: "updateChannel", element: <UpdateChannel /> },
           { path: "createChannel", element: <CreateChannel /> },

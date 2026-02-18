@@ -124,7 +124,7 @@ const ChannelProfile = () => {
           </h2>
           {isOwner && (
             <button
-              onClick={() => navigate('/studio/CreateVideo')}
+              onClick={() => navigate('/studio/uploadVideo')}
               className="flex items-center gap-2 bg-yt-text text-yt-bg px-4 py-2 rounded-full text-sm font-bold hover:opacity-90 active:scale-95 transition-all"
             >
               <PlusCircle size={18} /> Create Video
@@ -199,7 +199,7 @@ const ChannelProfile = () => {
             <p className="text-lg font-medium mb-2">No videos yet</p>
             {isOwner && (
               <button
-                onClick={() => navigate('/studio/CreateVideo')}
+                onClick={() => navigate('/studio/uploadVideo')}
                 className="bg-yt-primary text-white px-4 py-2 rounded-full font-bold hover:opacity-90 transition-all"
               >
                 Create Your First Video
