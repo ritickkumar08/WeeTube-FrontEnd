@@ -20,7 +20,7 @@ const CreateChannel = () => {
     uniqueDeleteKey: ''
   });
 
-  // Memoized auth headers (prevents re-creation on every render)
+  // Memoized auth headers (created once per component mount)
   const headers = useMemo(() => {
     const token = localStorage.getItem('token');
     return token ? { Authorization: `Bearer ${token}` } : {};

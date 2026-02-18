@@ -58,18 +58,28 @@ const useFetch = (
         method,
         url,
         data: body,
-        headers,
+        headers: {
+          'Content-Type': 'application/json',
+          ...headers,
+        },
       });
 
       // Update response data
       setData(response.data);
     } catch (err) {
       // Extract meaningful error message
-      setError( err?.response?.data?.message || err?.message || 'Something went wrong' );
+      const errorMessage = err?.response?.data?.message || err?.message || 'Something went wrong';
+      setError(errorMessage);
+      console.error('API Error:', {
+        url: err?.config?.url,
+        method: err?.config?.method,
+        status: err?.response?.status,
+        message: errorMessage,
+      });
     } finally {
       setLoading(false);
     }
-  }, [actionPath, method, ...deps]);
+  }, [actionPath, method, JSON.stringify(body), JSON.stringify(headers)]);
 
   /**
    * Automatically trigger fetch on dependency change
