@@ -46,15 +46,14 @@ const CreateChannel = () => {
   useEffect(() => {
     if (createData) {
       setCreateTrigger(null); // reset trigger
-      setRefreshTrigger('/channel/me');
+      setRefreshTrigger('/user/me');
     }
 
     if (createError) {
       setToast({
         type: 'error',
         title: 'Error',
-        message:
-          createError?.response?.data?.message || 'Channel creation failed'
+        message: typeof createError === 'string' ? createError : (createError?.response?.data?.message || 'Channel creation failed')
       });
       setCreateTrigger(null);
     }
