@@ -24,10 +24,10 @@ const CommentSection = ({ videoId, currentUser }) => {
   const headers = useMemo(() => {
     const token = localStorage.getItem("token");
     return token ? { Authorization: `Bearer ${token}` } : {};
-  }, [localStorage.getItem("token")]);
+  }, []);
 
   /* ===================== FETCH COMMENTS ===================== */
-  const { data: fetchedComments } = useFetch(
+  const { data: fetchedComments, refetch: refetchComments } = useFetch(
     videoId ? `/comment/${videoId}` : null,
     'GET',
     null,
@@ -51,41 +51,58 @@ const CommentSection = ({ videoId, currentUser }) => {
   const { data: postRes } = useFetch(
     postTrigger,
     "POST",
-    { text: newComment, videoId },
+    { commentText: newComment },
     headers,
     [postTrigger, videoId, newComment]
   );
 
   useEffect(() => {
     if (postRes) {
-      // prepend newest comment
-      setComments((prev) => [postRes, ...prev]);
+      const created = postRes?.newComment;
+      if (created) {
+        // optimistic prepend (backend may not populate userId on older deploys)
+        setComments((prev) => [
+          {
+            ...created,
+            userId:
+              typeof created.userId === "object"
+                ? created.userId
+                : (currentUser ? { ...currentUser, _id: currentUser._id } : created.userId),
+          },
+          ...prev,
+        ]);
+      } else {
+        refetchComments?.();
+      }
       setNewComment("");
       setPostTrigger(null);
     }
-  }, [postRes]);
+  }, [postRes, currentUser, refetchComments]);
   
   /* ===================== EDIT COMMENT ===================== */
-  const [patchTrigger, setPatchTrigger] = useState(null);
+  const [putTrigger, setPutTrigger] = useState(null);
 
-  const { data: patchRes } = useFetch(
-    patchTrigger,
-    "PATCH",
-    { text: editText },
+  const { data: putRes } = useFetch(
+    putTrigger,
+    "PUT",
+    { commentText: editText },
     headers,
-    [patchTrigger, editText]
+    [putTrigger, editText]
   );
 
   useEffect(() => {
-    if (patchRes) {
-      setComments((prev) =>
-        prev.map((c) => (c._id === patchRes._id ? patchRes : c))
-      );
+    if (putRes) {
+      const updated = putRes?.updatedComment ?? putRes;
+      if (updated?._id) {
+        setComments((prev) => prev.map((c) => (c._id === updated._id ? updated : c)));
+      } else {
+        refetchComments?.();
+      }
       setEditingId(null);
       setEditText("");
-      setPatchTrigger(null);
+      setPutTrigger(null);
     }
-  }, [patchRes]);
+  }, [putRes, refetchComments]);
 
   /* ===================== DELETE COMMENT ===================== */
   const [deleteTrigger, setDeleteTrigger] = useState(null);
@@ -112,17 +129,17 @@ const CommentSection = ({ videoId, currentUser }) => {
     if (!currentUser) return alert("Login required");
     if (!newComment.trim()) return;
 
-    setPostTrigger("/comment");
+    setPostTrigger(`/comment/new-comment/${videoId}`);
   };
 
   const startEdit = (comment) => {
     setEditingId(comment._id);
-    setEditText(comment.text);
+    setEditText(comment.commentText ?? "");
   };
 
   const saveEdit = (id) => {
     if (!editText.trim()) return;
-    setPatchTrigger(`/comment/${id}`);
+    setPutTrigger(`/comment/${id}`);
   };
 
   const handleDeleteComment = (id) => {
@@ -185,13 +202,17 @@ const CommentSection = ({ videoId, currentUser }) => {
       {/* Comments List */}
       <div className="space-y-6">
         {comments.map((comment) => {
-          const isOwner =
-            currentUser?._id === comment.user?._id;
+          const commentUserId =
+            typeof comment.userId === "object" ? comment.userId?._id : comment.userId;
+          const isOwner = Boolean(currentUser?._id && commentUserId && currentUser._id === commentUserId);
 
           return (
             <div key={comment._id} className="flex gap-4 group">
               <img
-                src={comment.user?.avatar}
+                src={
+                  (typeof comment.userId === "object" ? comment.userId?.avatar : null) ||
+                  ""
+                }
                 alt=""
                 className="h-10 w-10 rounded-full object-cover bg-yt-surface"
               />
@@ -200,7 +221,10 @@ const CommentSection = ({ videoId, currentUser }) => {
 
                 <div className="flex items-center gap-2 mb-1">
                   <span className="text-xs font-bold">
-                    @{comment.user?.username || "user"}
+                    @
+                    {(typeof comment.userId === "object"
+                      ? (comment.userId?.userName || comment.userId?.username)
+                      : null) || "user"}
                   </span>
                   <span className="text-xs text-yt-muted">
                     {new Date(comment.createdAt).toLocaleDateString()}
@@ -239,7 +263,7 @@ const CommentSection = ({ videoId, currentUser }) => {
                 ) : (
                   <div className="relative pr-10">
                     <p className="text-sm leading-relaxed">
-                      {comment.text}
+                      {comment.commentText}
                     </p>
 
                     {isOwner && (
