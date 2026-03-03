@@ -1,3 +1,5 @@
+hosted link :- https://wee-tube-front-end-pby6.vercel.app/
+
 # WeeTube-FrontEnd
 Weetube Frontend
 A modern video-streaming UI built with React, Vite, Tailwind, and Redux Toolkit.
